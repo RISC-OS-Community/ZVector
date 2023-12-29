@@ -1,0 +1,61 @@
+---------------------------------------------------------------
+- Lib ZVector for RISC OS
+- by Paolo Fabio Zaino 2023
+---------------------------------------------------------------
+
+_ Release 1.0.0 rc 12 _
+
+-----------------------
+-  DISCLAIMER  -
+-----------------------
+
+This is a port of a my original ZVector library (for multiple platforms like Linux, BSD, macOS, Windows etc.). This means that I had to apply some minor changes to it to make it easy to build and use on RISC OS. These changes are only in the way code is built, the actual sources are identical to my mainstream ZVector library since it's designed to be portable.
+
+-----------------------
+-  Intro  -
+-----------------------
+
+This is a RISC OS port of my Vector library. This port can be used with the cooperative multi-tasking scheduler used by RISC OS, so it's not the usual UNIX-port. Vector is designed to run on multiple platforms, which include both cooperative OSes and Preemptive ones. However, cooperative schedulers support is experimental on this specific release and it's not enabled by default.
+
+Next releases will have it enabled by default on the RISC OS source tree, but I need a bit more time to complete the code and finish the tests.
+
+If you do not know what Vector is then please have a look at the README.md file provided with the sources, or check my website at the following URLS:
+
+https://paolozaino.wordpress.com/portfolio/zvector-programming-library/
+
+And
+
+https://paolozaino.wordpress.com/2021/07/27/software-development-zvector-an-ansi-c-open-source-vector-library/
+
+Keep in mind that there are some minor differences in using Vector on RISC OS vs other operating systems. 
+
+First including the library in your own code:
+
+When you build Vector on RISC OS using my build scripts, they will store all the built binaries in an App structure called !LibZVector , when the build process is completed you can copy that library in your Boot:Apps.Library (for example) or wherever you'd like to keep it.
+
+To use it in your own code, make sure that RISC OS filer has seen it before you build your code, and to include the header you can use:
+
+#include "LibZVector:zector.h"
+
+This should work with both GCC and DDE compilers. If it doesn't please let me know.
+
+Then you'll need to make sure your linker can find ZVector library and, again, to do this you can use the path as above:
+
+-lLibZVector:zvector.a for GCC
+
+And 
+
+LibZVector:zvector.o for DDE when you like your files.
+
+If you use Shared Makefiles to build your own app, then you should add it to the linker flags with a += LibZVector:zvector.o
+
+For a proper user guide on using each library function please consult my website at the links above, they contain a full user guide with examples.
+
+Hope this helps! For any problem please let me know, meanwhile happy coding everyone!
+
+---------------
+- FINAL NOTES -
+---------------
+Thanks for using my Open Source work, and, most of all, thanks for coding on RISC OS :)
+
+- Paolo

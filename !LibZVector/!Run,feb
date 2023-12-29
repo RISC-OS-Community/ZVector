@@ -1,0 +1,7 @@
+| Lib ZVector for RISC OS
+| by Paolo Fabio Zaino 2023
+
+IconSprites <Obey$Dir>.!Sprites
+
+Set LibZVector$Dir <Obey$Dir>
+Set LibZVector$Path <LibZVector$Dir>.

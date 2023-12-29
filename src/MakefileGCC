@@ -1,0 +1,166 @@
+#######################################################################
+# Makefile for ZVector
+#######################################################################
+
+# Variables
+ifeq ($(OS),)
+  OS := RISC_OS
+endif
+
+# Set variables based on the detected OS
+ifeq ($(OS),Linux)
+  CD_CMD = cd
+  RM_CMD = rm -f
+  DIR_SYM =/
+  EXT_SYM =.
+  VER_SYM =.
+  LOCAL_DIR=.
+  CP_CMD  = \#
+  CF_CMD1 = \#
+  CF_CMD2 = \#
+  UP_DIR=..
+  MAKE_FLAGS = -j4
+else ifeq ($(OS),Darwin) # macOS
+  CD_CMD = cd
+  RM_CMD = rm -f
+  DIR_SYM =/
+  EXT_SYM =.
+  VER_SYM =.
+  LOCAL_DIR=.
+  UP_DIR=..
+  CP_CMD  = \#
+  CF_CMD1 = \#
+  CF_CMD2 = \#
+  MAKE_FLAGS = -j4
+else ifeq ($(OS),Windows)
+  CD_CMD = cd
+  RM_CMD = del
+  DIR_SYM =/
+  EXT_SYM =.
+  VER_SYM =.
+  LOCAL_DIR=.
+  UP_DIR=..
+  CP_CMD  = \#
+  CF_CMD1 = \#
+  CF_CMD2 = \#
+  MAKE_FLAGS = -j4
+else ifeq ($(OS),RISC_OS)
+  CD_CMD  = cdir
+  RM_CMD  = remove
+  CP_CMD  = copy
+  CF_CMD1 = IfThere
+  CF_CMD2 = Then
+  DIR_SYM =.
+  EXT_SYM =/
+  VER_SYM =.
+  LOCAL_DIR=@
+  UP_DIR=^
+  MAKE_FLAGS = -mthrowback
+else
+  $(error Unknown operating system: $(UNAME))
+endif
+
+CC = gcc
+LD = gcc
+
+APPDIR_NAME:=!LibZVector
+SRCF       :=zvector
+LIB_NAME   :=zvector
+LIB_OBJ    :=$(LIB_NAME).o
+LIB_CSTD   :=99
+LIB_SOVR   :=1
+LIB_VERS   :=$(LIB_SOVR).0.0
+
+ifeq ($(OS),RISC_OS)
+  CFLAGS     += -mthrowback
+endif
+CFLAGS  += -ansi -std=c99 -pedantic -Wall -Wextra
+CFLAGS  += -Wdisabled-optimization \
+          -Wshadow \
+          -Wundef \
+          -Wwrite-strings \
+          -Wredundant-decls \
+          -Wdisabled-optimization \
+          -Wdouble-promotion \
+          -Wmissing-declarations \
+          -Wmissing-prototypes \
+          -Wno-unused-function
+CFLAGS  += -O3 -fno-common -flto
+CFLAGS  += -I.
+CFLAGS  += -c
+
+LDFLAGS    +=
+
+# Process Source file names:
+OSRC       :=$(sort $(SRCF))
+SRCFR      :=$(patsubst %, c.%, $(OSRC))
+ifeq ($(OS),RISC_OS)
+  OBJF       :=$(patsubst %, o.%, $(OSRC))
+else
+  OBJF       :=$(patsubst %, %.o, $(OSRC))
+endif
+ST_OBJF    :=$(OBJF)
+SH_OBJF    :=$(OBJF)
+ifeq ($(OS),RISC_OS)
+  LIB_VERSRO :=$(subst .,/,$(LIB_VERS))
+else
+  LIB_VERSRO :=$(LIB_VERS)
+endif
+DEL        :=wipe
+DEL_FLAGS  :=~C F
+
+# Uncomment for debugging this Makefile:
+#$(info -- $(OSRC) --)
+#$(info ++ $(SRCFR) ++)
+#$(info -- $(OBJF) --)
+#$(info ++ $(LIB_VERSRO) ++)
+
+# Determine Static and Shared Lib name and options:
+SH_EXT=so
+ST_EXT=a
+
+SH_CFLAGS    :=-shared $(CFLAGS)
+ST_CFLAGS    :=-static $(CFLAGS)
+SH_EXTRAFLAGS:=-Wl,-soname=lib$(LIB_NAME)$(VER_SYM)$(SH_EXT)$(VER_SYM)$(LIB_SOVR)
+ST_EXTRAFLAGS:=
+
+LIBST     :=lib$(LIB_NAME)$(EXT_SYM)$(ST_EXT)
+LIBSH     :=lib$(LIB_NAME)$(DIR_SYM)$(SH_EXT)$(DIR_SYM)$(LIB_VERS)
+LIBSH_RO  :=lib$(LIB_NAME)$(EXT_SYM)$(SH_EXT)$(EXT_SYM)$(LIB_VERSRO)
+LIBSH_FRO :=lib$(LIB_NAME)$(EXT_SYM)$(SH_EXT)$(EXT_SYM)$(LIB_VERSRO)
+LIBSH_SO  :=lib$(LIB_NAME)$(DIR_SYM)$(SH_EXT)$(DIR_SYM)$(LIB_SOVR)
+LIBSH_SORO:=lib$(LIB_NAME)$(EXT_SYM)$(SH_EXT)$(EXT_SYM)$(LIB_SOVR)
+LIBSH_VER :=$(LIBSH)$(EXT_SYM)$(LIB_SOVR)
+LIBSH_VERS:=$(LIBSH)$(EXT_SYM)$(LIB_VERS)
+LNSRC     :=lib$(LIB_NAME)$(DIR_SYM)$(SH_EXT)$(DIR_SYM)$(LIB_SOVR)
+
+$(info -- $(LIBSH_RO) --)
+$(info ++ $(LIBSH_FRO) ++)
+
+TARGET = $(LIBST) $(LIBSH_RO)
+
+.PHONY:all
+all:		$(TARGET)
+
+$(LIBST):	$(LIB_NAME).o
+	$(info Building Static Library)
+	ar rcs $(LOCAL_DIR)$(DIR_SYM)$@ $(OBJF)
+	$(CF_CMD1) $(LOCAL_DIR)$(DIR_SYM)lib$(LIB_NAME)$(EXT_SYM)a $(CF_CMD2) $(CP_CMD) $(LOCAL_DIR)$(DIR_SYM)lib$(LIB_NAME)$(EXT_SYM)a $(LOCAL_DIR)$(DIR_SYM)$(UP_DIR)$(DIR_SYM)$(APPDIR_NAME)$(DIR_SYM)a$(DIR_SYM)lib$(LIB_NAME) ~C N F
+
+$(LIBSH_FRO):	$(LIB_NAME).c
+	$(info Building Dynamic Library)
+	$(CC) $(SH_CFLAGS) -o $(LOCAL_DIR)$(DIR_SYM)$@ $< $(SH_EXTRAFLAGS) $(LDFLAGS)
+	$(CF_CMD1) $(LOCAL_DIR)$(DIR_SYM)$(LIBSH_FRO) $(CF_CMD2) $(CP_CMD) $(LOCAL_DIR)$(DIR_SYM)$(LIBSH_FRO) $(LOCAL_DIR)$(DIR_SYM)$(UP_DIR)$(DIR_SYM)$(APPDIR_NAME)$(DIR_SYM)so$(DIR_SYM)$(LIBSH_FRO) ~C N F
+#	IfThere @.$(LIBSH_FRO) Then ln -f -s $(LIBSH_SO) $(LIBSH_SORO)
+
+$(LIB_NAME).o:	$(LIB_NAME).c
+		$(CC) $(CFLAGS) $<
+
+docs:		doxygen.conf zvector.c zvector.h
+		rm -rf docs
+		doxygen $<
+
+clean:
+		$(DEL) $(LOCAL_DIR)${DIR_SYM}o${DIR_SYM}*   $(DEL_FLAGS)
+		$(DEL) $(LOCAL_DIR)${DIR_SYM}*$(EXT_SYM)a   $(DEL_FLAGS)
+		$(DEL) $(LOCAL_DIR)${DIR_SYM}*$(EXT_SYM)so$(EXT_SYM)$(LIB_VERSRO) $(DEL_FLAGS)
