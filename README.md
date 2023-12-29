@@ -8,7 +8,7 @@ Still under active development.
 
 `- Security Tests:` [![CodeQL](https://github.com/pzaino/zvector/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/pzaino/zvector/actions) [![FlawFinder](https://github.com/pzaino/zvector/actions/workflows/flawfinder.yml/badge.svg)](https://github.com/pzaino/zvector/actions) [![Scorecard supply-chain security](https://github.com/pzaino/zvector/actions/workflows/scorecard.yml/badge.svg)](https://github.com/pzaino/zvector/actions/workflows/scorecard.yml)
 
-This is a source tree only for RISC OS operating system. If you need Vector for other OSes and platform please check the original and official source tree [here](https://github.com/pzaino/zvector)
+This is a source tree only for RISC OS operating system. If you need ZVector for other OSes and platforms please check the original and official source tree [here](https://github.com/pzaino/zvector)
 
 This is a fast, configurable, portable, thread safe and reentrant Vector Library (dynamic arrays) in ANSI C 99.
 
@@ -134,10 +134,26 @@ As general rules:
 Add the `zvector.h` to your C code with:
 
 ```C
-#include "zvector.h"
+#include "LibZVector:zvector.h"
 ```
 
-When compiling, make sure you link your code to the `libvector.a` as shown in the `Makefile` for the tests (in `tests`).
+When compiling, make sure you link your code to the correct binary library depending on the compiler you're suing to build your own application.
+
+Generally this can be done for GCC with:
+
+```bash
+-lLibZVector:zvector.a
+```
+
+(For static linking)
+
+And for DDE with:
+
+```bash
+LibZVector:zvector.o
+```
+
+(In the line where you link your objects or with a `+=` to the linker flags if you use Shared Makefiles)
 
 Before you can use a vector, you need to create one using the function:
 
@@ -172,71 +188,17 @@ For the complete and up-to-date User Guide please click [here](https://paolozain
 
 ## How do I build it?
 
-### GCC or CLang
+### GCC on RISC OS
 
-This has been tested on different Linux distributions, Apple macOS, FreeBSD, NetBSD, OpenBSD. It should also work on Free RTOS and ARM Embed OS.
+From the RISC OS Desktop, open the directory containing this repository and double click on MkGCC file, that will build everything and also update binaries in !LibZVector App structure for you.
 
-if you have GCC or CLang installed then use the Makefile provided, to build:
+### Using Acorn/Castle/ROOL DDE
 
-```bash
-make
-```
+From RISC OS Desktop, open the directory containing this repository and double click on MkDDE file, that will build everything and also update the binaries in !LibZVector App structure for you.
 
-And to build and run the tests:
+### To use !LibZVector
 
-```bash
-make tests
-```
-
-To install the static library and headers use:
-
-```bash
-make install
-```
-
-Note for CLang users on Linux: please check the Makefile before trying to build with clang and replace the value of variable `CC:=gcc` with `CC:=clang`.
-
-### Using zig compiler
-
-If you have zig installed, then you can build the library using zig, just edit the Makefile and set the variable `CC:=zig cc`, then add the specific target to CFLAGS and P_CFLAGS as follows:
-
-```makefile
-# Configure desired compiler:
-CC:=zig cc
-
-# Configure additional compiler and linker flags:
-CFLAGS+= -target aarch64-macos-none
-LDFLAGS+=
-# Flags to be used only for release or production builds:
-P_CFLAGS:= -O3 -target aarch64-macos-none
-```
-
-target can be any of the supported targets by zig, for example: `aarch64-macos-none`, `x86_64-linux-gnu`, `x86_64-windows-gnu`, `x86_64-windows-msvc`, `x86_64-fuchsia`, `x86_64-netbsd`, `x86_64-freebsd`, `x86_64-openbsd`, `x86_64-solaris`, `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`
-etc.
-
-Then build with:
-
-```bash
-make
-```
-
-and install with
-
-```bash
-make install
-```
-
-### Visual Studio
-
-If you use Microsoft Windows, then you can open the project in Visual Studio 2019 or 2022 and build it using Visual Studio Build function.
-
-### Other C Compilers
-
-At the moment I started to add support for different compilers which include NORCROFT C, HPC, IBM C and quite few others which should also allow to use ZVector on Operating Systems like OS/2 (ArkaOS), Haiku OS, RISC OS, old Windows, Amiga OS, Atari TOS / EmuTOS, OS-9, IBM AIX and AS-400 and more.
-
-I'll add support for other compilers when I'll have time.
-
-For more details, pre-requisites and whatnot please check the User Guide [here](https://paolozaino.wordpress.com/2021/07/27/software-development-zvector-an-ansi-c-open-source-vector-library/)
+Just copy it in a directory you have your other 3rd party libraries, normally that would be Boot:Apps.Libraries
 
 ## Performance
 
@@ -246,14 +208,7 @@ ZVector is already really fast, however, if one wants to gain even more performa
 - If your app is multi-threaded:
   - If it does a lot of sequential calls to `vect_add()` or `vect_remove()` then try to use the user locks before starting your loop of calls to vect_add or vect_remove. To use the user locks have a look at the User Guide for the function `vect_lock()` and `vect_unlock()`.
   - If you can, then use local vectors to your thread to process thread data, and when processing is completed, use `vect_move()` or `vect_merge()` to merge your local vector items to your global vector. This will reduce concurrency and increase parallelism. If you use this approach you can also improve performances even more by setting the local vector property `VECT_NOLOCKING`, so each vect_add etc. operation will not lock on the local vector. See 04PTest005 for more details on how to use this technique.
-- Try to use ZVector in conjunction with jemalloc or other fast memory allocation algorithms like tcmalloc etc.
-  - To run a quick test with jemalloc for example, if you have it installed in `/usr/lib64/`, then run:
 
-```bash
-LD_PRELOAD=/usr/lib64/libjemalloc.so.2 time ./tests/bin/04PTest001
-```
-
-Please note: when using libraries like jemalloc and similar, performance improvements will depend a lot on the system architecture you're using to test your code. So, do not expect the same performance improvements on an old Atom CPU compared to a more modern AMD Zen3 ;)
 
 To have an idea of the performance, you can use the following tests that come with ZVector:
 
@@ -262,9 +217,9 @@ To have an idea of the performance, you can use the following tests that come wi
 
 - 04PTestX All the tests that starts with 04PTest are generic performance tests, and they try to measure specific costs of each activity in the library.
 
-If you do not need the Thread Safe code in your own projects, then you can disable it from the Makefile (have a look at the file for details). Disabling the Thread Safe code will make the library even faster.
+If you do not need the Thread Safe code in your own projects, then you can disable it from the zvector_config in `src.h`
 
-If you do not need all the features offered by the library, you can disable subsets of the features. This will allow the library binary to be even smaller than it is now (on an ARM it's roughly 40KB) and that can help with caching the entire library.
+If you do not need all the features offered by the library, you can disable subsets of the features. This will allow the library binary to be even smaller than it is now.
 
 ## How much data can I store in this?
 
