@@ -1,0 +1,20 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "LibZVector:zvector.h"
+
+int main(void)
+{
+  vector v = vect_create(16, sizeof(int), ZV_SEC_WIPE);
+
+  for (int i = 1; i <= 10; i++)
+     vect_add(v, &i);
+
+  for (int i=1; i <= 10; i++)
+  {
+    int *val = (int *)vect_pop(v);
+    printf ("Value %d: %d\n", i, *val);
+  }
+
+  vect_destroy(v);
+  exit(EXIT_SUCCESS);
+}
