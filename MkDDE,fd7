@@ -1,0 +1,39 @@
+| Generic Library builder for DDE on RISC OS
+| by Paolo Fabio Zaino
+
+echo ++++++++++++++++++++++++
+echo ++ Building using DDE ++
+echo ++++++++++++++++++++++++
+
+Set Build$Root <Obey$Dir>
+
+WimpSlot -min 6144K
+
+echo ---------------------
+echo Building the Library:
+echo ---------------------
+
+Dir <Build$Root>.src
+IfThere @.o Then IfThere @.o.* Then Wipe @.o.* ~C ~V
+amu all_libs THROWBACK=-throwback -f MakeFileDDE
+
+IfThere @.o.zvectorlib Then copy @.o.zvectorlib @.^.!LibZVector.o.zvectorlib ~C N
+Ifthere @.o.zvectorlibzm Then copy @.o.zvectorlibzm @.^.!LibZVector.o.zvectorlibzm ~C N
+Ifthere @.h.zvector Then copy @.h.zvector @.^.!LibZVector.h.zvector ~C N
+
+echo
+echo ---------------------
+echo
+
+echo ---------------------
+echo Building Tests:
+echo ---------------------
+
+IfThere <Build$Root>.tests Then Dir <Build$Root>.tests
+IfThere <Build$Root>.tests.MakefileDDE Then make all THROWBACK=-throwback -f MakeFileDDE
+
+echo
+echo ---------------------
+echo
+
+Dir <Build$Root>

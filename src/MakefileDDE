@@ -1,0 +1,12 @@
+# Makefile for ZVector Library using DDE
+
+COMPONENT = zvectorlib
+
+# This is a list of source/object files for the library
+OBJS = zvector
+
+include CLibrary
+cflags+=-c99
+#-Ospace
+
+# Dynamic dependencies:
