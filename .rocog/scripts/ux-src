@@ -102,6 +102,7 @@ function check_path()
         [ "${last_dir}" == "c++" ] || [ "${last_dir}" == "C++" ] || \
         [ "${last_dir}" == "hpp" ] || [ "${last_dir}" == "HPP" ] || \
         [ "${last_dir}" == "hxx" ] || [ "${last_dir}" == "HXX" ] || \
+        [ "${last_dir}" == "h++" ] || [ "${last_dir}" == "H++" ] || \
         [ "${last_dir}" == "s" ] || [ "${last_dir}" == "S" ] || \
         [ "${last_dir}" == "Hdr" ] || [ "${last_dir}" == "hdr" ] || \
         [ "${last_dir}" == "fth" ] || [ "${last_dir}" == "FTH" ] || \
@@ -141,6 +142,7 @@ function find_files_and_link() {
     link_files "${dir_type}" "${src_dir}" "${dst_dir}" "HPP" "hpp"
     link_files "${dir_type}" "${src_dir}" "${dst_dir}" "hxx" "hxx"
     link_files "${dir_type}" "${src_dir}" "${dst_dir}" "HXX" "hxx"
+    link_files "${dir_type}" "${src_dir}" "${dst_dir}" "h++" "hpp"
 
     # Link C header files (if any):
     link_files "${dir_type}" "${src_dir}" "${dst_dir}" "h" "h"
