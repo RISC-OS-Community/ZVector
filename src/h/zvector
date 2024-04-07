@@ -129,6 +129,16 @@ void vect_set_wipefunct(vector const v, void (*f1)(const void *item, size_t size
 bool vect_is_empty(const_vector const v);
 
 /*
+ * vect_get_last_error returns the last error code
+ * that occurred in the vector while performing an
+ * operation. If no error occurred it will return 0.
+ * If an error occurred it will return a negative
+ * value that corresponds to the error code. You can
+ * use the ZVECT_ERR enum to check the error code.
+ */
+int vect_get_last_error(const vector const v);
+
+/*
  * vect_size returns the actual size (the number of)
  * USED slots in the vector storage.
  */
