@@ -136,7 +136,7 @@ bool vect_is_empty(const_vector const v);
  * value that corresponds to the error code. You can
  * use the ZVECT_ERR enum to check the error code.
  */
-int vect_get_last_error(const vector const v);
+int vect_get_last_error(const vector v);
 
 /*
  * vect_size returns the actual size (the number of)
